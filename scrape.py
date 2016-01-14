@@ -49,8 +49,11 @@ def main():
     papers_all = get_published_papers()
     total_citations = 0
     for paper in papers_all:
-        print(paper.bib['title'], "got cited", str(paper.citedby), " times")
-        total_citations += paper.citedby
+        try:
+            print(paper.bib['title'], "got cited", str(paper.citedby), " times")
+            total_citations += paper.citedby
+        except AttributeError:
+            continue
     print("Total citations:", total_citations)
 
 if __name__ == '__main__':
