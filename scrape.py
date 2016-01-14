@@ -26,22 +26,32 @@ class Papers(object):
         return self.num
 
     def __iter__(self):
-        return (paper.fill().bib for paper in self.papers)
+        return (paper.fill() for paper in self.papers)
 
 
-def get_published_papers():
+def get_published_papers(start_year=None, end_year=None):
     """ Returns a generator that returns dicts with paper metadata."""
-    return Papers("Cure Alzheimer's Fund", start_year=2015, end_year=2015)
+    return Papers("Cure Alzheimer's Fund",
+                  start_year=start_year, end_year=end_year)
 
 
 def main():
-    papers = get_published_papers()
+    # get data about papers published in 2015
+    papers = get_published_papers(2015, 2015)
     print("Number of results:", len(papers))
     for paper in papers:
         stuff = ['title', 'author', 'journal', 'volume', 'issue']
         for thing in stuff:
             if thing in paper:
-                print("{}: {}".format(thing, paper[thing]))
+                print("{}: {}".format(thing, paper.bib[thing]))
+
+    # get total number of citations
+    papers_all = get_published_papers()
+    total_citations = 0
+    for paper in papers_all:
+        print(paper.bib['title'], "got cited", str(paper.citedby), " times")
+        total_citations += paper.citedby
+    print("Total citations:", total_citations)
 
 if __name__ == '__main__':
     main()
