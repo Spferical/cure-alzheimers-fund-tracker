@@ -42,7 +42,7 @@ def main():
     for paper in papers:
         stuff = ['title', 'author', 'journal', 'volume', 'issue']
         for thing in stuff:
-            if thing in paper:
+            if thing in paper.bib:
                 print("{}: {}".format(thing, paper.bib[thing]))
 
     # get total number of citations
