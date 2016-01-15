@@ -153,7 +153,7 @@ def main():
     locale.setlocale(locale.LC_ALL, '')
     funded_researchers = [Name('Tanzi', 'Rudolph')]
     year = '2015'
-    _require_csv_file(year, True, True)
+    _require_csv_file(year)
     csv_filename = _BASE_DATA_FILENAME.format(year=year, extension='csv')
 
     researcher_data = []
