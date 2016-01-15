@@ -29,7 +29,7 @@ class Papers(object):
         return self.num
 
     def __iter__(self):
-        return (paper.fill() for paper in self.papers)
+        return self.papers
 
 
 def get_published_papers(start_year=None, end_year=None):
@@ -44,6 +44,7 @@ def main():
     papers = get_published_papers(2015, 2015)
     print("Number of results:", len(papers))
     for paper in papers:
+        paper.fill()
         print("-" * 10)
         stuff = ['title', 'author', 'journal', 'volume', 'issue']
         meta_to_data = dict()
