@@ -4,7 +4,6 @@ import re
 import requests
 import scholarly
 from pprint import pprint
-from pprint import pformat
 
 _EXACT_SEARCH = '/scholar?q="{}"'
 _START_YEAR = '&as_ylo={}'
@@ -51,8 +50,7 @@ def main():
         for thing in stuff:
             if thing in paper.bib:
                 meta_to_data[thing] = paper.bib[thing]
-        # pprint(meta_to_data)
-        print(pformat(meta_to_data))
+        pprint(meta_to_data)
 
     print('\n' * 4)
     print('#' * 10)
