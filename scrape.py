@@ -1,3 +1,5 @@
+#!/user/bin/env python3
+
 import re
 import requests
 import scholarly
@@ -62,14 +64,18 @@ def main():
     total_citations = 0
     for paper in papers_all:
         print('-' * 10)
+        print(paper.bib['title'])
         try:
-            print(paper.bib['title'])
             print("Cited", str(paper.citedby), "times")
             total_citations += paper.citedby
         except AttributeError:
-            print("Attribute error:")
-            print(paper)
-    print("Total citations:", total_citations)
+            print("Cited 0 times")
+    print('\n' * 4)
+    print('#' * 10)
+    print('\n' * 4)
+    print(
+        "TOTAL CITATIONS OF PAPERS CONTAINING THE EXACT WORDS \"CURE ALZHEIMER'S FUND\":",
+        total_citations)
 
 if __name__ == '__main__':
     main()
