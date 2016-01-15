@@ -1,6 +1,8 @@
 import re
 import requests
 import scholarly
+from pprint import pprint
+from pprint import pformat
 
 _EXACT_SEARCH = '/scholar?q="{}"'
 _START_YEAR = '&as_ylo={}'
@@ -37,25 +39,37 @@ def get_published_papers(start_year=None, end_year=None):
 
 def main():
     # get data about papers published in 2015
+    print("PAPERS PUBLISHED IN 2015 CONTAINING THE EXACT WORDS \"CURE ALZHEIMER'S FUND\"")
     papers = get_published_papers(2015, 2015)
     print("Number of results:", len(papers))
     for paper in papers:
+        print("-" * 10)
         stuff = ['title', 'author', 'journal', 'volume', 'issue']
+        meta_to_data = dict()
         for thing in stuff:
             if thing in paper.bib:
-                print("{}: {}".format(thing, paper.bib[thing]))
+                meta_to_data[thing] = paper.bib[thing]
+        # pprint(meta_to_data)
+        print(pformat(meta_to_data))
+
+    print('\n' * 4)
+    print('#' * 10)
+    print('\n' * 4)
 
     # get total number of citations
+    print("GETTING TOTAL NUMBER OF CITATIONS...")
     papers_all = get_published_papers()
     total_citations = 0
     for paper in papers_all:
+        print('-' * 10)
         try:
-            print(paper.bib['title'], "got cited", str(paper.citedby), " times")
+            print(paper.bib['title'])
+            print("Cited", str(paper.citedby), "times")
             total_citations += paper.citedby
         except AttributeError:
-            continue
+            print("Attribute error:")
+            print(paper)
     print("Total citations:", total_citations)
 
 if __name__ == '__main__':
     main()
-
