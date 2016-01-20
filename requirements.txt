@@ -1,0 +1,1 @@
+-e git+https://github.com/OrganicIrradiation/scholarly.git@db0d27afae06908cac22e43648c871985d111fad#egg=scholarly
