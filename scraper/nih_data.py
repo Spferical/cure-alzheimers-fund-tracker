@@ -27,17 +27,10 @@ _SUB_COST_IDX = 44
 Project = namedtuple('Project', 'researcher title url funding_amount')
 
 
-class Name:
-    '''Researcher name.
-    Pretty name is Lastname, Firstname. Query regex is \bLASTNAME, FIRSTNAME\b
-    '''
-    def __init__(self, last_name, first_name, middle=''):
-        self.last_name = last_name
-        self.first_name = first_name
-        self.middle = middle
-        middle_pretty = ' ' + middle if middle != '' else ''
-        self.pretty_name = '{}, {} {}'.format(last_name, first_name, middle_pretty)
-        self.query_regex = r"\b" + self.pretty_name.upper() + r"\b"
+def get_query_regex(name):
+    """ Generates a query regex of the form \bNAME\b
+    Name is assumed to be of the form Lastname, Firstname MI."""
+    return r"\b" + name.upper() + r"\b"
 
 
 def _decode_file(filename):
@@ -131,7 +124,7 @@ def _projects_data(researcher, filename):
 
             principal_investigators = entry[_PI_IDX]
             pi_participated_in_entry = re.search(
-                researcher.query_regex, principal_investigators) is not None
+                get_query_regex(researcher), principal_investigators) is not None
 
             if not pi_participated_in_entry:
                 continue
@@ -149,10 +142,7 @@ def _projects_data(researcher, filename):
     return researcher_projects
 
 
-def main():
-    locale.setlocale(locale.LC_ALL, '')
-    funded_researchers = [Name('Tanzi', 'Rudolph')]
-    year = '2015'
+def scrape(funded_researchers, year):
     _require_csv_file(year)
     csv_filename = _BASE_DATA_FILENAME.format(year=year, extension='csv')
 
@@ -161,13 +151,21 @@ def main():
         researcher_projects = _projects_data(researcher, csv_filename)
         researcher_data.extend(researcher_projects)
 
-    for entry in researcher_data:
-        print('-' * 10)
-        print("Researcher:", entry.researcher.pretty_name)
-        print("Project:", entry.title)
-        print("URL:", entry.url)
-        funding_str = locale.currency(entry.funding_amount, grouping=True)[:-3]
-        print("Amount:", funding_str)
+        for entry in researcher_projects:
+            print('-' * 10)
+            print("Researcher:", entry.researcher.pretty_name)
+            print("Project:", entry.title)
+            print("URL:", entry.url)
+            funding_str = locale.currency(entry.funding_amount, grouping=True)[:-3]
+            print("Amount:", funding_str)
+        # TODO: remove duplicates
+
+
+def main():
+    locale.setlocale(locale.LC_ALL, '')
+    funded_researchers = ["Tanzi, Rudolph"]
+    year = '2015'
+    scrape(funded_researchers, year)
 
 
 if __name__ == '__main__':
