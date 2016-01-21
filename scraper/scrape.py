@@ -66,10 +66,10 @@ def main():
     authors = []
     for paper in papers_all:
         print('-' * 10)
+        paper.fill()
         print(paper.bib['title'])
-
+        print("Authors: " + paper.bib['author'])
         authors.extend(paper.bib['author'].split(' and '))
-
         try:
             print("Cited", str(paper.citedby), "times")
             total_citations += paper.citedby
