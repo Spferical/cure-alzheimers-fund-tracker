@@ -41,22 +41,22 @@ def get_published_papers(start_year=None, end_year=None):
 
 def main():
     # get data about papers published in 2015
-#    print("PAPERS PUBLISHED IN 2015 CONTAINING THE EXACT WORDS \"CURE ALZHEIMER'S FUND\"")
-#    papers = get_published_papers(2015, 2015)
-#    print("Number of results:", len(papers))
-#    for paper in papers:
-#        paper.fill()
-#        print("-" * 10)
-#        stuff = ['title', 'author', 'journal', 'volume', 'issue']
-#        meta_to_data = dict()
-#        for thing in stuff:
-#            if thing in paper.bib:
-#                meta_to_data[thing] = paper.bib[thing]
-#        pprint(meta_to_data)
-#
-#    print('\n' * 4)
-#    print('#' * 10)
-#    print('\n' * 4)
+    print("PAPERS PUBLISHED IN 2015 CONTAINING THE EXACT WORDS \"CURE ALZHEIMER'S FUND\"")
+    papers = get_published_papers(2015, 2015)
+    print("Number of results:", len(papers))
+    for paper in papers:
+        paper.fill()
+        print("-" * 10)
+        stuff = ['title', 'author', 'journal', 'volume', 'issue']
+        meta_to_data = dict()
+        for thing in stuff:
+            if thing in paper.bib:
+                meta_to_data[thing] = paper.bib[thing]
+        pprint(meta_to_data)
+
+    print('\n' * 4)
+    print('#' * 10)
+    print('\n' * 4)
 
     # get total number of citations
     # also get a list of funded authors
