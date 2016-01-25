@@ -61,7 +61,8 @@ def main():
     # get total number of citations
     # also get a list of funded authors
     print("GETTING AUTHORS & TOTAL NUMBER OF CITATIONS...")
-    papers_all = get_published_papers()
+    papers_all = list(get_published_papers())
+    print("ALL PAPERS GOTTEN, FILLING INFO FOR EACH")
     total_citations = 0
     authors = []
     for paper in papers_all:
