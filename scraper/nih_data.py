@@ -145,6 +145,9 @@ def save_projects_data(researcher, filename):
 
 
 def scrape(year):
+    # needed for currency
+    locale.setlocale(locale.LC_ALL, '')
+
     _require_csv_file(year)
     csv_filename = _BASE_DATA_FILENAME.format(year=year, extension='csv')
 
