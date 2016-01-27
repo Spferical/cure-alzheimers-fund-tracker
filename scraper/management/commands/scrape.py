@@ -1,9 +1,13 @@
 from django.core.management.base import BaseCommand
 from datetime import date
+import pickle
+import os
 from scraper import scholar_data
 from scraper import nih_data
 from scraper.models import Paper, Author
 
+
+PROGRESS_FILE = 'scrape_progress.db'
 
 class Command(BaseCommand):
     def handle_publication(self, publication, year):
@@ -46,18 +50,42 @@ class Command(BaseCommand):
             if not paper.authors.filter(name=name):
                 paper.authors.add(author)
 
+    def abort(self, publications):
+        # pickle everything unhandled and try again later
+        self.stdout.write("SOMETHING WENT WRONG: SAVING PROGRESS")
+        with open(PROGRESS_FILE, 'wb') as progress_file:
+            pickle.dump(publications, progress_file)
+
     def handle(self, *args, **options):
         # {year : publications}
         publications = {}
+        if os.path.isfile(PROGRESS_FILE):
+            # load our previous progress, if any
+            with open(PROGRESS_FILE, 'rb') as progress_file:
+                publications = pickle.load(progress_file)
+            # remove it for now --
+            # if anything goes wrong, we'll save it again!
+            os.remove(PROGRESS_FILE)
+
         for year in range(2007, date.today().year):
-            self.stdout.write("GETTING PAPERS FOR YEAR " + str(year))
-            publications[year] = \
-                list(scholar_data.get_published_papers(year, year))
+            if not year in publications:
+                self.stdout.write("GETTING PAPERS FOR YEAR " + str(year))
+                try:
+                    publications[year] = \
+                        list(scholar_data.get_published_papers(year, year))
+                except Exception:
+                    self.abort(publications)
+                    raise
 
         self.stdout.write("ALL PAPERS GOTTEN, FILLING INFO FOR EACH")
         for year in publications:
-            for publication in publications[year]:
-                self.handle_publication(publication, year)
+            for publication in publications[year][:]:
+                try:
+                    self.handle_publication(publication, year)
+                    publications[year].remove(publication)
+                except Exception:
+                    self.abort(publications)
+                    raise
         self.stdout.write('\n' * 4)
         self.stdout.write('#' * 10)
         self.stdout.write('\n' * 4)
