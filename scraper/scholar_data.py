@@ -3,8 +3,6 @@
 import re
 import requests
 import scholarly
-from pprint import pprint
-import nih_data
 
 _EXACT_SEARCH = '/scholar?q="{}"'
 _START_YEAR = '&as_ylo={}'
@@ -37,57 +35,3 @@ def get_published_papers(start_year=None, end_year=None):
     """ Returns a generator that returns dicts with paper metadata."""
     return Papers("Cure Alzheimer's Fund",
                   start_year=start_year, end_year=end_year)
-
-
-def main():
-    # get data about papers published in 2015
-    print("PAPERS PUBLISHED IN 2015 CONTAINING THE EXACT WORDS \"CURE ALZHEIMER'S FUND\"")
-    papers = get_published_papers(2015, 2015)
-    print("Number of results:", len(papers))
-    for paper in papers:
-        paper.fill()
-        print("-" * 10)
-        stuff = ['title', 'author', 'journal', 'volume', 'issue']
-        meta_to_data = dict()
-        for thing in stuff:
-            if thing in paper.bib:
-                meta_to_data[thing] = paper.bib[thing]
-        pprint(meta_to_data)
-
-    print('\n' * 4)
-    print('#' * 10)
-    print('\n' * 4)
-
-    # get total number of citations
-    # also get a list of funded authors
-    print("GETTING AUTHORS & TOTAL NUMBER OF CITATIONS...")
-    papers_all = list(get_published_papers())
-    print("ALL PAPERS GOTTEN, FILLING INFO FOR EACH")
-    total_citations = 0
-    authors = []
-    for paper in papers_all:
-        print('-' * 10)
-        paper.fill()
-        print(paper.bib['title'])
-        print("Authors: " + paper.bib['author'])
-        authors.extend(paper.bib['author'].split(' and '))
-        try:
-            print("Cited", str(paper.citedby), "times")
-            total_citations += paper.citedby
-        except AttributeError:
-            print("Cited 0 times")
-    print('\n' * 4)
-    print('#' * 10)
-    print('\n' * 4)
-    print(
-        "TOTAL CITATIONS OF PAPERS CONTAINING THE EXACT WORDS \"CURE ALZHEIMER'S FUND\":",
-        total_citations)
-
-    # now we can get the NIH grants for each author
-    print("Authors:")
-    for author in authors:
-        print(author)
-    nih_data.scrape(authors, '2015')
-
-if __name__ == '__main__':
-    main()

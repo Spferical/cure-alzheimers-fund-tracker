@@ -5,12 +5,10 @@ import shutil
 import re
 import zipfile
 import csv
-import codecs
 import locale
 import os.path
 import urllib.request
-from collections import namedtuple
-from pprint import pprint
+from scraper.models import Author, Project
 
 _BASE_SUMMARY_URL = "https://projectreporter.nih.gov/project_info_description.cfm?aid={app_id}"
 _BASE_DATA_FILENAME = "RePORTER_PRJ_C_FY{year}.{extension}"
@@ -23,8 +21,6 @@ _PI_IDX = 29
 _PROJ_TITLE_IDX = 34
 _TOTAL_COST_IDX = 43
 _SUB_COST_IDX = 44
-
-Project = namedtuple('Project', 'researcher title url funding_amount')
 
 
 def get_query_regex(name):
@@ -107,66 +103,50 @@ def _total_cost(csv_entry):
     return total_cost
 
 
-def _projects_data(researcher, filename):
+def save_projects_data(researcher, filename):
     '''Get project data for projects associated with passed
     researcher in passed filename.
     '''
-    researcher_projects = []
     with open(filename, 'r') as csv_file:
         data_reader = csv.reader(csv_file, quotechar='"')
-        count = 0
         for entry in data_reader:
             if len(entry) < 45:
-                # print("###")
-                # pprint(entry)
-                # print("###")
                 continue
 
             principal_investigators = entry[_PI_IDX]
             pi_participated_in_entry = re.search(
-                get_query_regex(researcher), principal_investigators) is not None
+                get_query_regex(researcher.name), principal_investigators) is not None
 
             if not pi_participated_in_entry:
                 continue
-
-            # print(principal_investigators)
-            # print("-" * 10)
-            # pprint(entry)
 
             title = entry[_PROJ_TITLE_IDX]
             total_cost = _total_cost(entry)
             app_id = entry[_APP_ID_IDX]
             url = _BASE_SUMMARY_URL.format(app_id=app_id)
-            researcher_projects.append(
-                Project(researcher, title, url, total_cost))
-    return researcher_projects
+            print('-' * 10)
+            print("Researcher:", researcher.name)
+            print("Project:", title)
+            print("URL:", url)
+            funding_str = locale.currency(total_cost, grouping=True)[:-3]
+            print("Amount:", funding_str)
+            query = Project.objects.filter(title=title)
+            if not query:
+                # only create the project if it doesn't exist yet
+                project = Project(
+                    researcher=researcher,
+                    title=title,
+                    url=url,
+                    funding_amount=total_cost)
+            else:
+                project = query[0]
+                project.funding_amount = total_cost
+            project.save()
 
 
-def scrape(funded_researchers, year):
+def scrape(year):
     _require_csv_file(year)
     csv_filename = _BASE_DATA_FILENAME.format(year=year, extension='csv')
 
-    researcher_data = []
-    for researcher in funded_researchers:
-        researcher_projects = _projects_data(researcher, csv_filename)
-        researcher_data.extend(researcher_projects)
-
-        for entry in researcher_projects:
-            print('-' * 10)
-            print("Researcher:", entry.researcher.pretty_name)
-            print("Project:", entry.title)
-            print("URL:", entry.url)
-            funding_str = locale.currency(entry.funding_amount, grouping=True)[:-3]
-            print("Amount:", funding_str)
-        # TODO: remove duplicates
-
-
-def main():
-    locale.setlocale(locale.LC_ALL, '')
-    funded_researchers = ["Tanzi, Rudolph"]
-    year = '2015'
-    scrape(funded_researchers, year)
-
-
-if __name__ == '__main__':
-    main()
+    for researcher in Author.objects.all():
+        save_projects_data(researcher, csv_filename)
