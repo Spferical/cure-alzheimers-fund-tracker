@@ -23,13 +23,16 @@ class Command(BaseCommand):
         if not query:
             # we haven't saved this paper yet!
             paper = Paper(
-                url=publication.bib['url'],
                 title=publication.bib['title'],
                 citations=num_citations,
                 year=year)
         else:
             paper = query[0]
 
+        if 'url' in publication.bib:
+            paper.url = publication.bib['url']
+        else:
+            paper.url = ''
         if 'volume' in publication.bib:
             paper.volume = publication.bib['volume']
         if 'issue' in publication.bib:
