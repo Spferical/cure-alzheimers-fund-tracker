@@ -1,11 +1,12 @@
 from django.core.management.base import BaseCommand
+from datetime import date
 from scraper import scholar_data
 from scraper import nih_data
 from scraper.models import Paper, Author
 
 
 class Command(BaseCommand):
-    def handle_publication(self, publication):
+    def handle_publication(self, publication, year):
         self.stdout.write('-' * 10)
         publication.fill()
         try:
@@ -21,19 +22,16 @@ class Command(BaseCommand):
                 url=publication.bib['url'],
                 title=publication.bib['title'],
                 citations=num_citations,
-                abstract=publication.bib['abstract'],
-                year=int(publication.bib['year']))
+                year=year)
         else:
             paper = query[0]
 
-        try:
+        if 'volume' in publication.bib:
             paper.volume = publication.bib['volume']
-        except KeyError:
-            pass
-        try:
+        if 'issue' in publication.bib:
             paper.issue = publication.bib['issue']
-        except KeyError:
-            pass
+        if 'abstract' in publication.bib:
+            paper.abstract = publication.bib['abstract']
         paper.save()
         self.stdout.write(publication.bib['title'])
         self.stdout.write("Authors: " + publication.bib['author'])
@@ -49,14 +47,17 @@ class Command(BaseCommand):
                 paper.authors.add(author)
 
     def handle(self, *args, **options):
-        # get total number of citations
-        # also get a list of funded authors
-        self.stdout.write("GETTING ALL PAPERS")
-        publications = list(scholar_data.get_published_papers())
-        self.stdout.write("ALL PAPERS GOTTEN, FILLING INFO FOR EACH")
-        for publication in publications:
-            self.handle_publication(publication)
+        # {year : publications}
+        publications = {}
+        for year in range(2007, date.today().year):
+            self.stdout.write("GETTING PAPERS FOR YEAR " + str(year))
+            publications[year] = \
+                list(scholar_data.get_published_papers(year, year))
 
+        self.stdout.write("ALL PAPERS GOTTEN, FILLING INFO FOR EACH")
+        for year in publications:
+            for publication in publications[year]:
+                self.handle_publication(publication, year)
         self.stdout.write('\n' * 4)
         self.stdout.write('#' * 10)
         self.stdout.write('\n' * 4)
