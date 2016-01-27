@@ -54,7 +54,7 @@ def _decode_file(filename):
     os.remove(tmp_filename)
 
 
-def _require_csv_file(fiscal_year, force_redownload=False, force_reunzip=True):
+def _require_csv_file(fiscal_year, force_redownload=False, force_reunzip=False):
     '''Download the CSV file for the passed fiscal year if necessary.
     Return True if successful, False otherwise.
     '''
