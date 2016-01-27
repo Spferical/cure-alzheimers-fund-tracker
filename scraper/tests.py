@@ -32,13 +32,14 @@ class ScrapeTestCase(TestCase):
             'Hats and Other Stuff', 'example.com',
             36, 'Tanzi, Rudolph', 'More about hats and stuff', 2015, 1)
         p3 = DummyPublication(
-            'No Abstract: Reviewed', 'example.com', 36, 'Bob, Billy', 2015)
+            'No Abstract: Reviewed', 'example.com', 0, 'Bob, Billy', 2015)
         p4 = DummyPublication(
-            'No Year: Revisited', 'example.com', 36, 'Bob, Billy')
+            'No Year: Revisited', 'example.com', 12, 'Bob, Billy')
         command = scrape.Command()
         command.handle_publication(p1, 1992)
         command.handle_publication(p2, 2015)
         command.handle_publication(p3, 2015)
+        command.handle_publication(p4, 2014)
         nih_data.scrape('1992')
         nih_data.scrape('2015')
 
@@ -46,4 +47,4 @@ class ScrapeTestCase(TestCase):
             self.assertEqual(paper.title, 'Hats and Other Stuff')
             self.assertEqual(paper.year, 2015)
         query = Paper.objects.filter(url='example.com')
-        self.assertEqual(len(query), 2)
+        self.assertEqual(len(query), 4)
