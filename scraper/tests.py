@@ -59,3 +59,11 @@ class ScrapeTestCase(TestCase):
         self.assertEqual(len(query), 3)
         query = Author.objects.filter(name='others')
         self.assertEqual(len(query), 0)
+
+    def test_unicode(self):
+        p = DummyPublication(
+            'Converting Bibtex to Unicode', 12, r'Unic{\o}der, J{\o}rgen H')
+        command = scrape.Command()
+        command.handle_publication(p, 2015)
+        author = Author.objects.all()[0]
+        self.assertEqual(author.name, "Unicøder, Bøb H")

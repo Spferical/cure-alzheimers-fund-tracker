@@ -1,7 +1,10 @@
-from django.core.management.base import BaseCommand
 from datetime import date
 import pickle
 import os
+import itertools
+from bibtexparser.latexenc import unicode_to_latex, unicode_to_crappy_latex1, \
+    unicode_to_crappy_latex2
+from django.core.management.base import BaseCommand
 from scraper import scholar_data
 from scraper import nih_data
 from scraper.models import Paper, Author
@@ -19,11 +22,12 @@ class Command(BaseCommand):
             num_citations = 0
         self.stdout.write("Cited " + str(num_citations) + " times")
         # check to see if we already saved this publication or not
-        query = Paper.objects.filter(title=publication.bib['title'])
+        title = convert_to_unicode(publication.bib['title'])
+        query = Paper.objects.filter(title=title)
         if not query:
             # we haven't saved this paper yet!
             paper = Paper(
-                title=publication.bib['title'],
+                title=title,
                 citations=num_citations,
                 year=year)
         else:
@@ -38,13 +42,14 @@ class Command(BaseCommand):
         if 'issue' in publication.bib:
             paper.issue = publication.bib['issue']
         if 'abstract' in publication.bib:
-            paper.abstract = publication.bib['abstract']
+            paper.abstract = convert_to_unicode(publication.bib['abstract'])
         paper.save()
         self.stdout.write(publication.bib['title'])
         self.stdout.write("Authors: " + publication.bib['author'])
         for name in publication.bib['author'].split(' and '):
             if self.is_bad(name):
-                    continue
+                continue
+            name = convert_to_unicode(name)
             query = Author.objects.filter(name=name)
             if not query:
                 # this is a new author
@@ -101,3 +106,27 @@ class Command(BaseCommand):
     def is_bad(self, name):
         return name in ['other', 'others']
 
+def convert_to_unicode(text):
+    """
+    Convert accent from latex to unicode style.
+    Returns the modified text.
+    """
+    # modified from python-bibtexparser convert_to_unicode function
+    # see https://github.com/sciunto-org/python-bibtexparser/
+    if '\\' in text or '{' in text:
+        for k, v in itertools.chain(unicode_to_crappy_latex1, unicode_to_latex):
+            if v in text:
+                text = text.replace(v, k)
+
+    # If there is still very crappy items
+    if '\\' in text:
+        for k, v in unicode_to_crappy_latex2:
+            if v in text:
+                parts = text.split(str(v))
+                for key, text in enumerate(parts):
+                    if key+1 < len(parts) and len(parts[key+1]) > 0:
+                        # Change order to display accents
+                        parts[key] = parts[key] + parts[key+1][0]
+                        parts[key+1] = parts[key+1][1:]
+                text = k.join(parts)
+    return text
