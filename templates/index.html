@@ -134,11 +134,25 @@
                 var $row = $(row),
                     $cols = $row.find('td');
 
-                return $cols.map(function (j, col) {
-                    var $col = $(col),
-                        text = $col.text();
+                if($(row).hasClass("danger") === true) {
+                	return;
+                }
 
-                    return text.replace(/"/g, '""'); // escape double quotes
+                return $cols.map(function (j, col) {
+                	if (j === 0) {
+                		return;
+                	}
+                	else {
+                		if (j === 1)
+                		{
+                			return $(col).find("a").attr("href");
+                		}
+                		else
+                		{
+                			var $col = $(col);
+                        	return $col.text().replace(/"/g, '""');
+                		}
+                	}
 
                 }).get().join(tmpColDelim);
 
@@ -146,7 +160,6 @@
                 .split(tmpRowDelim).join(rowDelim)
                 .split(tmpColDelim).join(colDelim) + '"',
 
-            // Data URI
             csvData = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csv);
 
 	        $(this)
