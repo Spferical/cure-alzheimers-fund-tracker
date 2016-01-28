@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.test import TestCase
 from scraper.management.commands import scrape
 from scraper import nih_data
