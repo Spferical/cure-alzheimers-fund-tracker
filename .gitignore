@@ -58,3 +58,7 @@ target/
 
 # Database
 *.sqlite3
+
+# Downloaded crap
+*.csv
+*.zip
