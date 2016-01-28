@@ -6,11 +6,10 @@ from scraper.models import Paper
 class DummyPublication(object):
     def fill(self):
         pass
-    def __init__(self, title, url, citations, authors, year=None,
+    def __init__(self, title, citations, authors, url=None, year=None,
                  abstract=None, volume=None, issue=None):
         self.bib = {}
         self.bib['title'] = title
-        self.bib['url'] = url
         self.citedby = citations
         self.bib['author'] = authors
         if year:
@@ -21,20 +20,30 @@ class DummyPublication(object):
             self.volume = volume
         if issue:
             self.issue = issue
+        if url:
+            self.bib['url'] = url
 
 # Create your tests here.
 class ScrapeTestCase(TestCase):
     def test_scraping(self):
         p1 = DummyPublication(
-            'Hats and Stuff', 'example.com', 63,
-            'Hats, Bob and Hats, Billy', 'About hats and stuff', 1992, 1)
+            'Hats and Stuff', 63, 'Hats, Bob and Hats, Billy',
+            url='example.com',
+            abstract='About hats and stuff',
+            year=1992,
+            volume=1)
         p2 = DummyPublication(
-            'Hats and Other Stuff', 'example.com',
-            36, 'Tanzi, Rudolph', 'More about hats and stuff', 2015, 1)
+            'Hats and Other Stuff', 36, 'Tanzi, Rudolph',
+            url='example.com',
+            abstract='More about hats and stuff',
+            year=2015,
+            volume=1)
         p3 = DummyPublication(
-            'No Abstract: Reviewed', 'example.com', 0, 'Bob, Billy', 2015)
+            'No Abstract or website: Reviewed', 0, 'Bob, Billy',
+            year=2015)
         p4 = DummyPublication(
-            'No Year: Revisited', 'example.com', 12, 'Bob, Billy')
+            'No Year: Revisited', 12, 'Bob, Billy',
+            url='example.com')
         command = scrape.Command()
         command.handle_publication(p1, 1992)
         command.handle_publication(p2, 2015)
@@ -47,4 +56,4 @@ class ScrapeTestCase(TestCase):
             self.assertEqual(paper.title, 'Hats and Other Stuff')
             self.assertEqual(paper.year, 2015)
         query = Paper.objects.filter(url='example.com')
-        self.assertEqual(len(query), 4)
+        self.assertEqual(len(query), 3)
