@@ -72,9 +72,9 @@
 					data: response
 				});
 
-				$(".bootstrap-checkbox").bootstrapToggle();
+				$("#paperTable .bootstrap-checkbox").bootstrapToggle();
 
-				$('.bootstrap-checkbox').change(function() {
+				$('#paperTable .bootstrap-checkbox').change(function() {
 					jQuery(this).parent().parent().parent().toggleClass("danger");
 				});
 
@@ -84,13 +84,13 @@
 
 		jQuery.get("http://localhost:8000/scraper/api/projects/?format=json", function(response) {
 			$(function () {
-				$('#paperTable').bootstrapTable({
+				$('#projectTable').bootstrapTable({
 					data: response
 				});
 
-				$(".bootstrap-checkbox").bootstrapToggle();
+				$("#projectTable .bootstrap-checkbox").bootstrapToggle();
 
-				$('.bootstrap-checkbox').change(function() {
+				$('#projectTable .bootstrap-checkbox').change(function() {
 					jQuery(this).parent().parent().parent().toggleClass("danger");
 				});
 
