@@ -28,6 +28,15 @@
 		<h1>Cure Alzheimer's Fund Citations</h1>
 		<div id="toolbar" class="table">
 		</div>
+
+		<a href="#" id="exportPapersButton" class="btn btn-success" role="button">
+			<i class="glyphicon glyphicon-cloud-download"></i>Export Google Scholars Data to CSV
+		</a>
+
+		<a href="#" id="exportProjectsButton" class="btn btn-success" role="button">
+			<i class="glyphicon glyphicon-cloud-download"></i>Export NIH Data to CSV
+		</a>
+
 		<table id="paperTable" class="hidden">
 			<thead>
 				<tr>
@@ -60,14 +69,6 @@
 		</table>
 
 		<hr>
-
-		<a href="#" id="exportPapersButton" class="btn btn-success" role="button">
-			<i class="glyphicon glyphicon-cloud-download"></i>Export Google Scholars Data to CSV
-		</a>
-
-		<a href="#" id="exportProjectsButton" class="btn btn-success" role="button">
-			<i class="glyphicon glyphicon-cloud-download"></i>Export NIH Data to CSV
-		</a>
 	</div>
 	<script type="text/javascript">
 		jQuery.get("http://localhost:8000/scraper/api/papers/?format=json", function(response) { 
