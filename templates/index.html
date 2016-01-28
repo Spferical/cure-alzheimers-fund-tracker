@@ -31,7 +31,7 @@
 			<thead>
 				<tr>
 					<th style="width:20px"></th>
-					<th data-field="url">Url</th>
+					<th data-field="url" data-formatter="LinkFormatter">Url</th>
 					<th data-field="title">Title</th>
 					<th data-field="citations">Citations</th>
 					<th data-field="abstract">Abstract</th>
@@ -56,6 +56,9 @@
 				$("#paperTable").removeClass("hidden");
 			});
 		});
+		function LinkFormatter(value, row, index) {
+			return "<a href='"+value+"'>link</a>";
+		}
 	</script>
   </body>
 </html>
