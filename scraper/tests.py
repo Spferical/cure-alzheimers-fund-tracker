@@ -66,4 +66,4 @@ class ScrapeTestCase(TestCase):
         command = scrape.Command()
         command.handle_publication(p, 2015)
         author = Author.objects.all()[0]
-        self.assertEqual(author.name, "Unicøder, Bøb H")
+        self.assertEqual(author.name, "Unicøder, Jørgen H")
