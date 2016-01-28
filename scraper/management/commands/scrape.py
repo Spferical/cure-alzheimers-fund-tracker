@@ -95,7 +95,8 @@ class Command(BaseCommand):
         self.stdout.write('#' * 10)
         self.stdout.write('\n' * 4)
 
-        nih_data.scrape('2015')
+        for year in range(2007, date.today().year):
+            nih_data.scrape(str(year))
 
     def is_bad(self, name):
         return name in ['other', 'others']
