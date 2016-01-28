@@ -40,7 +40,7 @@
 					<th data-field="volume">Volume</th>
 					<th data-field="issue">Issue</th>
 					<th data-field="year">Year</th>
-					<th data-field="authors">Authors</th>
+					<th data-field="authors" data-formatter="ListFormatter">Authors</th>
 				</tr>
 			</thead>
 		</table>
@@ -104,7 +104,10 @@
 
 		function LinkFormatter(value, row, index) {
 			return "<a href='"+value+"'>link</a>";
-		}
+		};
+		function ListFormatter(value, row, index) {
+			return "<p>" + value.join("</p><p>") + "</p>";
+		};
 	</script>
   </body>
 </html>

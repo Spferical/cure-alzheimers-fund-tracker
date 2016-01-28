@@ -16,6 +16,7 @@ class PaperSerializer(serializers.ModelSerializer):
 	"""
 	Serializes papers
 	"""
+	authors = serializers.StringRelatedField(many=True)
 
 	class Meta:
 		model = Paper
