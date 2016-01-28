@@ -1,4 +1,5 @@
 #!/user/bin/env python3
+
 '''Download NIH RePORTER database and find project data for funded researchers.'''
 
 import shutil
@@ -7,7 +8,7 @@ import zipfile
 import csv
 import locale
 import os.path
-import urllib.request
+import urllib2
 from scraper.models import Author, Project
 
 _BASE_SUMMARY_URL = "https://projectreporter.nih.gov/project_info_description.cfm?aid={app_id}"
@@ -24,8 +25,8 @@ _SUB_COST_IDX = 44
 
 
 def get_query_regex(name):
-    """ Generates a query regex of the form \bNAME\b
-    Name is assumed to be of the form Lastname, Firstname MI."""
+    ''' Generates a query regex of the form \bNAME\b
+    Name is assumed to be of the form Lastname, Firstname MI.'''
     return r"\b" + name.upper() + r"\b"
 
 
@@ -38,7 +39,7 @@ def _decode_file(filename):
     shutil.copyfile(filename, tmp_filename)
     with open(tmp_filename, 'rb') as unfixed:
         with open(filename, 'w') as fixed:
-            # print("Failed lines:", "-" * 10, "\n\n")
+            # print "Failed lines:", "-" * 10, "\n\n"
             for line in unfixed:
                 fixed_line = line.rstrip()
                 if len(fixed_line) == 0:
@@ -48,9 +49,9 @@ def _decode_file(filename):
                     fixed.write(fixed_line)
                     fixed.write('\n')
                 except UnicodeDecodeError:
-                    # print('\n', fixed_line)
+                    # print '\n', fixed_line
                     pass
-            # print("\n\n/Failed lines", "-" * 10)
+            # print "\n\n/Failed lines", "-" * 10
     os.remove(tmp_filename)
 
 
@@ -64,20 +65,20 @@ def _require_csv_file(fiscal_year, force_redownload=False, force_reunzip=False):
     zip_file_exists = os.path.isfile(zip_filename)
 
     if csv_file_exists and not force_redownload and not force_reunzip:
-        print("File already exists:", csv_filename)
+        print "File already exists:", csv_filename
         return True
 
     # Download zip file
     if not zip_file_exists or force_redownload:
         url = _BASE_DATA_URL.format(year=fiscal_year)
-        print("Downloading from {}...".format(url))
-        request = urllib.request.urlopen(url)
+        print "Downloading from {}...".format(url)
+        request = urllib2.urlopen(url)
         with open(zip_filename, 'wb') as zip_file:
             shutil.copyfileobj(request, zip_file)
 
     # Unzip data file
     if not csv_file_exists or force_reunzip:
-        print("Unzipping {}...".format(zip_filename))
+        print "Unzipping {}...".format(zip_filename)
         zip_ref = zipfile.ZipFile(zip_filename, 'r')
         zip_ref.extractall()
         _decode_file(csv_filename)
@@ -124,12 +125,12 @@ def save_projects_data(researcher, filename):
             total_cost = _total_cost(entry)
             app_id = entry[_APP_ID_IDX]
             url = _BASE_SUMMARY_URL.format(app_id=app_id)
-            print('-' * 10)
-            print("Researcher:", researcher.name)
-            print("Project:", title)
-            print("URL:", url)
+            print '-' * 10
+            print "Researcher:", researcher.name
+            print "Project:", title
+            print "URL:", url
             funding_str = locale.currency(total_cost, grouping=True)[:-3]
-            print("Amount:", funding_str)
+            print "Amount:", funding_str
             query = Project.objects.filter(title=title)
             if not query:
                 # only create the project if it doesn't exist yet
