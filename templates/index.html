@@ -6,11 +6,12 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
-	<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.0/css/bootstrap-toggle.min.css" rel="stylesheet">
-	<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.0/js/bootstrap-toggle.min.js"></script>
 	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.0/bootstrap-table.min.css">
 	<script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.0/bootstrap-table.min.js"></script>
 	<script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.0/locale/bootstrap-table-zh-CN.min.js"></script>
+	<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.0/css/bootstrap-toggle.min.css" rel="stylesheet">
+	<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.0/js/bootstrap-toggle.min.js"></script>
+
 	<title>Code for Good 2016</title>
 
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
@@ -30,7 +31,7 @@
 		<table id="paperTable" class="hidden">
 			<thead>
 				<tr>
-					<th style="width:20px"></th>
+					<th data-formatter="CheckboxFormatter" style="width:20px"></th>
 					<th data-field="url" data-formatter="LinkFormatter">Url</th>
 					<th data-field="title">Title</th>
 					<th data-field="citations">Citations</th>
@@ -43,6 +44,23 @@
 				</tr>
 			</thead>
 		</table>
+
+		<hr>
+
+		<table id="projectTable" class="hidden">
+			<thead>
+				<tr>
+					<th data-formatter="CheckboxFormatter" style="width:20px"></th>
+					<th data-field="url" data-formatter="LinkFormatter">Url</th>
+					<th data-field="title">Title</th>
+					<th data-field="researcher">Researcher</th>
+					<th data-field="funding_amount">Funding Amount</th>
+				</tr>
+			</thead>
+		</table>
+
+		<hr>
+
 		<button id="export" class="btn btn-success">
 			<i class="glyphicon glyphicon-cloud-download"></i> Export to CSV
 		</button>
@@ -53,9 +71,37 @@
 				$('#paperTable').bootstrapTable({
 					data: response
 				});
+
+				$(".bootstrap-checkbox").bootstrapToggle();
+
+				$('.bootstrap-checkbox').change(function() {
+					jQuery(this).parent().parent().parent().toggleClass("danger");
+				});
+
 				$("#paperTable").removeClass("hidden");
 			});
 		});
+
+		jQuery.get("http://localhost:8000/scraper/api/projects/?format=json", function(response) {
+			$(function () {
+				$('#paperTable').bootstrapTable({
+					data: response
+				});
+
+				$(".bootstrap-checkbox").bootstrapToggle();
+
+				$('.bootstrap-checkbox').change(function() {
+					jQuery(this).parent().parent().parent().toggleClass("danger");
+				});
+
+				$("#projectTable").removeClass("hidden");
+			});
+		});
+
+		function CheckboxFormatter(value, row, index) {
+			return "<input class=\"bootstrap-checkbox\" type=\"checkbox\" checked data-toggle=\"toggle\">";
+		}
+
 		function LinkFormatter(value, row, index) {
 			return "<a href='"+value+"'>link</a>";
 		}
