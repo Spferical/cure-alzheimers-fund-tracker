@@ -27,7 +27,8 @@ class ProjectSerializer(serializers.ModelSerializer):
 	"""
 	Serializes projects
 	"""
+	researcher = serializers.StringRelatedField()
 
 	class Meta:
-		model = Paper
+		model = Project
 		fields = ('researcher', 'title', 'url', 'funding_amount',)

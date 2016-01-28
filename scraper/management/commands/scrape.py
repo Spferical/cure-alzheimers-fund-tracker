@@ -83,7 +83,7 @@ class Command(BaseCommand):
                 try:
                     publications[year] = \
                         list(scholar_data.get_published_papers(year, year))
-                except Exception:
+                except:
                     self.abort(publications)
                     raise
 
@@ -93,7 +93,7 @@ class Command(BaseCommand):
                 try:
                     self.handle_publication(publication, year)
                     publications[year].remove(publication)
-                except Exception:
+                except:
                     self.abort(publications)
                     raise
         self.stdout.write('\n' * 4)
