@@ -43,6 +43,8 @@ class Command(BaseCommand):
         self.stdout.write(publication.bib['title'])
         self.stdout.write("Authors: " + publication.bib['author'])
         for name in publication.bib['author'].split(' and '):
+            if self.is_bad(name):
+                    continue
             query = Author.objects.filter(name=name)
             if not query:
                 # this is a new author
@@ -94,4 +96,7 @@ class Command(BaseCommand):
         self.stdout.write('\n' * 4)
 
         nih_data.scrape('2015')
+
+    def is_bad(self, name):
+        return name in ['other', 'others']
 

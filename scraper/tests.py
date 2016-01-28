@@ -1,7 +1,7 @@
 from django.test import TestCase
 from scraper.management.commands import scrape
 from scraper import nih_data
-from scraper.models import Paper
+from scraper.models import Author, Paper
 
 class DummyPublication(object):
     def fill(self):
@@ -42,7 +42,7 @@ class ScrapeTestCase(TestCase):
             'No Abstract or website: Reviewed', 0, 'Bob, Billy',
             year=2015)
         p4 = DummyPublication(
-            'No Year: Revisited', 12, 'Bob, Billy',
+            'No Year: Revisited', 12, 'Bob, Billy and others',
             url='example.com')
         command = scrape.Command()
         command.handle_publication(p1, 1992)
@@ -57,3 +57,5 @@ class ScrapeTestCase(TestCase):
             self.assertEqual(paper.year, 2015)
         query = Paper.objects.filter(url='example.com')
         self.assertEqual(len(query), 3)
+        query = Author.objects.filter(name='others')
+        self.assertEqual(len(query), 0)
