@@ -147,7 +147,11 @@
                 		{
                 			return $(col).find("a").attr("href");
                 		}
-                		else
+				else if (j === 9)
+				{
+					return $(col).html().replace(/<\/p><p>/g, ' + ').replace('<\/p>', '').replace('<p>', '');
+				}
+				else
                 		{
                 			var $col = $(col);
                         	return $col.text().replace(/"/g, '""');
