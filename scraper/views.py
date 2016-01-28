@@ -21,7 +21,7 @@ class AuthorViewSet(viewsets.ModelViewSet):
 
 class PaperViewSet(viewsets.ModelViewSet):
 	"""
-	API endpoint to access authors
+	API endpoint to access papers
 	"""
 	queryset = Paper.objects.all()
 	serializer_class = PaperSerializer
@@ -29,7 +29,7 @@ class PaperViewSet(viewsets.ModelViewSet):
 
 class ProjectViewSet(viewsets.ModelViewSet):
 	"""
-	API endpoint to access authors
+	API endpoint to access projects
 	"""
 	queryset = Project.objects.all()
 	serializer_class = ProjectSerializer
