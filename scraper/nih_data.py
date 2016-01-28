@@ -103,7 +103,7 @@ def _total_cost(csv_entry):
     return total_cost
 
 
-def save_projects_data(researcher, filename):
+def save_projects_data(researcher, filename, year):
     '''Get project data for projects associated with passed
     researcher in passed filename.
     '''
@@ -130,14 +130,15 @@ def save_projects_data(researcher, filename):
             print("URL:", url)
             funding_str = locale.currency(total_cost, grouping=True)[:-3]
             print("Amount:", funding_str)
-            query = Project.objects.filter(title=title)
+            query = Project.objects.filter(title=title, year=int(year))
             if not query:
                 # only create the project if it doesn't exist yet
                 project = Project(
                     researcher=researcher,
                     title=title,
                     url=url,
-                    funding_amount=total_cost)
+                    funding_amount=total_cost,
+                    year=int(year))
             else:
                 project = query[0]
                 project.funding_amount = total_cost
@@ -152,4 +153,4 @@ def scrape(year):
     csv_filename = _BASE_DATA_FILENAME.format(year=year, extension='csv')
 
     for researcher in Author.objects.all():
-        save_projects_data(researcher, csv_filename)
+        save_projects_data(researcher, csv_filename, year)

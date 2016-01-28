@@ -25,3 +25,4 @@ class Project(models.Model):
     title = models.TextField()
     url = models.TextField()
     funding_amount = models.IntegerField()
+    year = models.IntegerField()
