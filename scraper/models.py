@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from django.db import models
 
 
@@ -18,6 +19,8 @@ class Paper(models.Model):
     issue = models.IntegerField(null=True)
     year = models.IntegerField()
     authors = models.ManyToManyField(Author)
+    class Meta:
+        ordering = ['year', 'title']
 
 
 class Project(models.Model):
@@ -25,3 +28,6 @@ class Project(models.Model):
     title = models.TextField()
     url = models.TextField()
     funding_amount = models.IntegerField()
+    year = models.IntegerField()
+    class Meta:
+        ordering = ['year', 'title']

@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from rest_framework import serializers
 from scraper.models import Author, Paper, Project
 
@@ -31,4 +32,4 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Project
-		fields = ('researcher', 'title', 'url', 'funding_amount', 'id',)
+		fields = ('researcher', 'title', 'url', 'funding_amount', 'year', 'id',)

@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from datetime import date
 import pickle
 import os
@@ -43,6 +44,9 @@ class Command(BaseCommand):
             paper.issue = publication.bib['issue']
         if 'abstract' in publication.bib:
             paper.abstract = convert_to_unicode(publication.bib['abstract'])
+        if 'journal' in publication.bib:
+            paper.journal = convert_to_unicode(publication.bib['journal'])
+
         paper.save()
         self.stdout.write(publication.bib['title'])
         self.stdout.write("Authors: " + publication.bib['author'])

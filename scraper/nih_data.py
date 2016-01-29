@@ -1,13 +1,15 @@
 #!/user/bin/env python3
+
 '''Download NIH RePORTER database and find project data for funded researchers.'''
 
+from __future__ import unicode_literals
 import shutil
 import re
 import zipfile
 import csv
 import locale
 import os.path
-import urllib.request
+import urllib2
 from scraper.models import Author, Project
 
 _BASE_SUMMARY_URL = "https://projectreporter.nih.gov/project_info_description.cfm?aid={app_id}"
@@ -23,9 +25,25 @@ _TOTAL_COST_IDX = 43
 _SUB_COST_IDX = 44
 
 
+def unicode_csv_reader(unicode_csv_data, dialect=csv.excel, **kwargs):
+    # from https://docs.python.org/2/library/csv.html
+    # csv.py doesn't do Unicode; encode temporarily as UTF-8:
+    csv_reader = csv.reader(utf_8_encoder(unicode_csv_data),
+                            dialect=dialect, **kwargs)
+    for row in csv_reader:
+        # decode UTF-8 back to Unicode, cell by cell:
+        yield [unicode(cell, 'utf-8') for cell in row]
+
+
+def utf_8_encoder(unicode_csv_data):
+    # from https://docs.python.org/2/library/csv.html
+    for line in unicode_csv_data:
+        yield line.encode('utf-8')
+
+
 def get_query_regex(name):
-    """ Generates a query regex of the form \bNAME\b
-    Name is assumed to be of the form Lastname, Firstname MI."""
+    ''' Generates a query regex of the form \bNAME\b
+    Name is assumed to be of the form Lastname, Firstname MI.'''
     return r"\b" + name.upper() + r"\b"
 
 
@@ -38,7 +56,7 @@ def _decode_file(filename):
     shutil.copyfile(filename, tmp_filename)
     with open(tmp_filename, 'rb') as unfixed:
         with open(filename, 'w') as fixed:
-            # print("Failed lines:", "-" * 10, "\n\n")
+            # print "Failed lines:", "-" * 10, "\n\n"
             for line in unfixed:
                 fixed_line = line.rstrip()
                 if len(fixed_line) == 0:
@@ -48,9 +66,9 @@ def _decode_file(filename):
                     fixed.write(fixed_line)
                     fixed.write('\n')
                 except UnicodeDecodeError:
-                    # print('\n', fixed_line)
+                    # print '\n', fixed_line
                     pass
-            # print("\n\n/Failed lines", "-" * 10)
+            # print "\n\n/Failed lines", "-" * 10
     os.remove(tmp_filename)
 
 
@@ -64,20 +82,20 @@ def _require_csv_file(fiscal_year, force_redownload=False, force_reunzip=False):
     zip_file_exists = os.path.isfile(zip_filename)
 
     if csv_file_exists and not force_redownload and not force_reunzip:
-        print("File already exists:", csv_filename)
+        print "File already exists:", csv_filename
         return True
 
     # Download zip file
     if not zip_file_exists or force_redownload:
         url = _BASE_DATA_URL.format(year=fiscal_year)
-        print("Downloading from {}...".format(url))
-        request = urllib.request.urlopen(url)
+        print "Downloading from {}...".format(url)
+        request = urllib2.urlopen(url)
         with open(zip_filename, 'wb') as zip_file:
             shutil.copyfileobj(request, zip_file)
 
     # Unzip data file
     if not csv_file_exists or force_reunzip:
-        print("Unzipping {}...".format(zip_filename))
+        print "Unzipping {}...".format(zip_filename)
         zip_ref = zipfile.ZipFile(zip_filename, 'r')
         zip_ref.extractall()
         _decode_file(csv_filename)
@@ -103,12 +121,12 @@ def _total_cost(csv_entry):
     return total_cost
 
 
-def save_projects_data(researcher, filename):
+def save_projects_data(researcher, filename, year):
     '''Get project data for projects associated with passed
     researcher in passed filename.
     '''
     with open(filename, 'r') as csv_file:
-        data_reader = csv.reader(csv_file, quotechar='"')
+        data_reader = unicode_csv_reader(csv_file, quotechar=str('"'))
         for entry in data_reader:
             if len(entry) < 45:
                 continue
@@ -124,20 +142,21 @@ def save_projects_data(researcher, filename):
             total_cost = _total_cost(entry)
             app_id = entry[_APP_ID_IDX]
             url = _BASE_SUMMARY_URL.format(app_id=app_id)
-            print('-' * 10)
-            print("Researcher:", researcher.name)
-            print("Project:", title)
-            print("URL:", url)
+            print '-' * 10
+            print "Researcher:", researcher.name
+            print "Project:", title
+            print "URL:", url
             funding_str = locale.currency(total_cost, grouping=True)[:-3]
             print("Amount:", funding_str)
-            query = Project.objects.filter(title=title)
+            query = Project.objects.filter(title=title, year=int(year))
             if not query:
                 # only create the project if it doesn't exist yet
                 project = Project(
                     researcher=researcher,
                     title=title,
                     url=url,
-                    funding_amount=total_cost)
+                    funding_amount=total_cost,
+                    year=int(year))
             else:
                 project = query[0]
                 project.funding_amount = total_cost
@@ -152,4 +171,4 @@ def scrape(year):
     csv_filename = _BASE_DATA_FILENAME.format(year=year, extension='csv')
 
     for researcher in Author.objects.all():
-        save_projects_data(researcher, csv_filename)
+        save_projects_data(researcher, csv_filename, year)

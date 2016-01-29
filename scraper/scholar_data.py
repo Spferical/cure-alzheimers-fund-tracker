@@ -1,5 +1,6 @@
 #!/user/bin/env python3
 
+from __future__ import unicode_literals
 import re
 import requests
 import scholarly
