@@ -109,7 +109,7 @@
 		}
 
 		function loadNotAllowed(table, cookie_name) {
-			$('#paperTable tr').each(function (i, row) {
+			table.find('tr').each(function (i, row) {
 				var $row = $(row),
 					id = parseInt($row.find('.id_col').text());
 				if (i === 0)
