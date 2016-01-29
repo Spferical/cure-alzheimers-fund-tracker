@@ -3,6 +3,7 @@ from datetime import date
 import pickle
 import os
 import itertools
+import time
 from bibtexparser.latexenc import unicode_to_latex, unicode_to_crappy_latex1, \
     unicode_to_crappy_latex2
 from django.core.management.base import BaseCommand
@@ -15,6 +16,7 @@ PROGRESS_FILE = 'scrape_progress.db'
 
 class Command(BaseCommand):
     def handle_publication(self, publication, year):
+        time.sleep(50)
         self.stdout.write('-' * 10)
         publication.fill()
         try:
