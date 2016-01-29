@@ -9,7 +9,7 @@ class DummyPublication(object):
     def fill(self):
         pass
     def __init__(self, title, citations, authors, url=None, year=None,
-                 abstract=None, volume=None, issue=None):
+                 abstract=None, volume=None, issue=None, journal=None):
         self.bib = {}
         self.bib['title'] = title
         self.citedby = citations
@@ -24,6 +24,8 @@ class DummyPublication(object):
             self.issue = issue
         if url:
             self.bib['url'] = url
+        if journal:
+            self.bib['journal'] = journal
 
 # Create your tests here.
 class ScrapeTestCase(TestCase):
@@ -45,7 +47,7 @@ class ScrapeTestCase(TestCase):
             year=2015)
         p4 = DummyPublication(
             'No Year: Revisited', 12, 'Bob, Billy and others',
-            url='example.com')
+            url='example.com', journal='Journal of Science')
         command = scrape.Command()
         command.handle_publication(p1, 1992)
         command.handle_publication(p2, 2015)
@@ -61,6 +63,8 @@ class ScrapeTestCase(TestCase):
         self.assertEqual(len(query), 3)
         query = Author.objects.filter(name='others')
         self.assertEqual(len(query), 0)
+        query = Paper.objects.filter(journal='Journal of Science')
+        self.assertEqual(len(query), 1)
 
     def test_unicode(self):
         p = DummyPublication(
