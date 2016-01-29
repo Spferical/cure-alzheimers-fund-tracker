@@ -30,8 +30,6 @@
 		<div id="toolbar" class="table">
 		</div>
 
-		<hr>
-
 		<a href="#" id="exportPapersButton" class="btn btn-success" role="button">
 			<i class="glyphicon glyphicon-cloud-download"></i>Export Google Scholars Data to CSV
 		</a>
@@ -39,6 +37,8 @@
 		<a href="#" id="exportProjectsButton" class="btn btn-success" role="button">
 			<i class="glyphicon glyphicon-cloud-download"></i>Export NIH Data to CSV
 		</a>
+
+		<hr>
 
 		<table id="paperTable" class="hidden">
 			<thead>
@@ -122,7 +122,7 @@
 			});
 		}
 
-		jQuery.get("http://localhost:8000/scraper/api/papers/?format=json", function(response) { 
+		jQuery.get("/scraper/api/papers/?format=json", function(response) { 
 			$(function () {
 				$('#paperTable').bootstrapTable({
 					data: response
@@ -147,7 +147,7 @@
 			});
 		});
 
-		jQuery.get("http://localhost:8000/scraper/api/projects/?format=json", function(response) {
+		jQuery.get("/scraper/api/projects/?format=json", function(response) {
 			$(function () {
 				$('#projectTable').bootstrapTable({
 					data: response
