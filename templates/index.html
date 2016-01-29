@@ -8,8 +8,7 @@
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.0/bootstrap-table.min.css">
 	<script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.0/bootstrap-table.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.0/locale/bootstrap-table-en-US.min.js"></script>
-
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.0/locale/bootstrap-table-zh-CN.min.js"></script>
 	<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.0/css/bootstrap-toggle.min.css" rel="stylesheet">
 	<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.0/js/bootstrap-toggle.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
@@ -67,11 +66,7 @@
 					<th data-field="title">Title</th>
 					<th data-field="researcher">Researcher</th>
 					<th data-field="funding_amount">Funding Amount</th>
-<<<<<<< HEAD
-					<th data-field="id">ID</th>
-=======
-					<th data-field="year">Year</th>
->>>>>>> 6745ac412adfea7ba276d71664cd83aeac80fe80
+					<th data-field="id" class="hidden" data-formatter="IDFormatter" >ID</th>
 				</tr>
 			</thead>
 		</table>
@@ -79,7 +74,6 @@
 		<hr>
 	</div>
 	<script type="text/javascript">
-<<<<<<< HEAD
 		function storeCookie(id, cookie_name) {
 			if (typeof $.cookie(cookie_name) === 'undefined') {
 				$.cookie(cookie_name, JSON.stringify({'data': []}));
@@ -126,9 +120,6 @@
 		}
 
 		jQuery.get("http://localhost:8000/scraper/api/papers/?format=json", function(response) { 
-=======
-		jQuery.get("/scraper/api/papers/?format=json", function(response) { 
->>>>>>> 6745ac412adfea7ba276d71664cd83aeac80fe80
 			$(function () {
 				$('#paperTable').bootstrapTable({
 					data: response
@@ -153,7 +144,7 @@
 			});
 		});
 
-		jQuery.get("/scraper/api/projects/?format=json", function(response) {
+		jQuery.get("http://localhost:8000/scraper/api/projects/?format=json", function(response) {
 			$(function () {
 				$('#projectTable').bootstrapTable({
 					data: response
@@ -161,8 +152,17 @@
 
 				$("#projectTable .bootstrap-checkbox").bootstrapToggle();
 
+				loadNotAllowed($('#projectTable'), 'project_cookies');
+
 				$('#projectTable .bootstrap-checkbox').change(function() {
-					jQuery(this).parent().parent().parent().toggleClass("danger");
+					var parent = jQuery(this).parent().parent().parent();
+					parent.toggleClass("danger");
+					id_val = parseInt(parent.find(".id_col").text());
+
+					if (parent.hasClass("danger") === true)
+						storeCookie(id_val, 'project_cookies');
+					else
+						deleteCookie(id_val, 'project_cookies');
 				});
 
 				$("#projectTable").removeClass("hidden");
@@ -216,11 +216,7 @@
                 		{
                 			return $(col).find("a").attr("href");
                 		}
-				else if (j === 9)
-				{
-					return $(col).html().replace(/<\/p><p>/g, ' + ').replace('<\/p>', '').replace('<p>', '');
-				}
-				else
+                		else
                 		{
                 			var $col = $(col);
                         	return $col.text().replace(/"/g, '""');
