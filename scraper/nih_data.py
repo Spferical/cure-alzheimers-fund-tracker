@@ -44,7 +44,7 @@ def utf_8_encoder(unicode_csv_data):
 def get_query_regex(name):
     ''' Generates a query regex of the form \bNAME\b
     Name is assumed to be of the form Lastname, Firstname MI.'''
-    return r"\b" + name.upper() + r"\b"
+    return r"\b" + re.escape(name.upper()) + r"\b"
 
 
 def _decode_file(filename):
@@ -125,6 +125,8 @@ def save_projects_data(researcher, filename, year):
     '''Get project data for projects associated with passed
     researcher in passed filename.
     '''
+    print 'Searching for ' + researcher.name
+    regex = re.compile(get_query_regex(researcher.name))
     with open(filename, 'r') as csv_file:
         data_reader = unicode_csv_reader(csv_file, quotechar=str('"'))
         for entry in data_reader:
@@ -132,8 +134,8 @@ def save_projects_data(researcher, filename, year):
                 continue
 
             principal_investigators = entry[_PI_IDX]
-            pi_participated_in_entry = re.search(
-                get_query_regex(researcher.name), principal_investigators) is not None
+            pi_participated_in_entry = regex.match(principal_investigators) \
+                is not None
 
             if not pi_participated_in_entry:
                 continue
