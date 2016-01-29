@@ -211,7 +211,7 @@
                 }
 
                 return $cols.map(function (j, col) {
-                	if (j === 0) {
+                	if (j === 0 || $(col).find('.id_col').length != 0) {
                 		return;
                 	}
                 	else {
