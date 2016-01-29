@@ -2,6 +2,7 @@
 
 '''Download NIH RePORTER database and find project data for funded researchers.'''
 
+from __future__ import unicode_literals
 import shutil
 import re
 import zipfile
@@ -22,6 +23,22 @@ _PI_IDX = 29
 _PROJ_TITLE_IDX = 34
 _TOTAL_COST_IDX = 43
 _SUB_COST_IDX = 44
+
+
+def unicode_csv_reader(unicode_csv_data, dialect=csv.excel, **kwargs):
+    # from https://docs.python.org/2/library/csv.html
+    # csv.py doesn't do Unicode; encode temporarily as UTF-8:
+    csv_reader = csv.reader(utf_8_encoder(unicode_csv_data),
+                            dialect=dialect, **kwargs)
+    for row in csv_reader:
+        # decode UTF-8 back to Unicode, cell by cell:
+        yield [unicode(cell, 'utf-8') for cell in row]
+
+
+def utf_8_encoder(unicode_csv_data):
+    # from https://docs.python.org/2/library/csv.html
+    for line in unicode_csv_data:
+        yield line.encode('utf-8')
 
 
 def get_query_regex(name):
@@ -109,7 +126,7 @@ def save_projects_data(researcher, filename, year):
     researcher in passed filename.
     '''
     with open(filename, 'r') as csv_file:
-        data_reader = csv.reader(csv_file, quotechar='"')
+        data_reader = unicode_csv_reader(csv_file, quotechar=str('"'))
         for entry in data_reader:
             if len(entry) < 45:
                 continue
