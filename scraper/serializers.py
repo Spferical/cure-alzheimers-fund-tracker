@@ -20,7 +20,7 @@ class PaperSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Paper
-		fields = ('url', 'title', 'citations', 'abstract', 'journal', 'volume', 'issue', 'year', 'authors',)
+		fields = ('url', 'title', 'citations', 'abstract', 'journal', 'volume', 'issue', 'year', 'authors', 'id',)
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -31,4 +31,4 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Project
-		fields = ('researcher', 'title', 'url', 'funding_amount',)
+		fields = ('researcher', 'title', 'url', 'funding_amount', 'id',)

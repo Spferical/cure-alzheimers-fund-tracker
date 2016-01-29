@@ -11,6 +11,7 @@
 	<script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.0/locale/bootstrap-table-zh-CN.min.js"></script>
 	<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.0/css/bootstrap-toggle.min.css" rel="stylesheet">
 	<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.0/js/bootstrap-toggle.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
 
 	<title>Code for Good 2016</title>
 
@@ -50,6 +51,7 @@
 					<th data-field="issue">Issue</th>
 					<th data-field="year">Year</th>
 					<th data-field="authors" data-formatter="ListFormatter">Authors</th>
+					<th data-field="id" class="hidden" data-formatter="IDFormatter">ID<th>
 				</tr>
 			</thead>
 		</table>
@@ -64,6 +66,7 @@
 					<th data-field="title">Title</th>
 					<th data-field="researcher">Researcher</th>
 					<th data-field="funding_amount">Funding Amount</th>
+					<th data-field="id">ID</th>
 				</tr>
 			</thead>
 		</table>
@@ -71,6 +74,51 @@
 		<hr>
 	</div>
 	<script type="text/javascript">
+		function storeCookie(id, cookie_name) {
+			if (typeof $.cookie(cookie_name) === 'undefined') {
+				$.cookie(cookie_name, JSON.stringify({'data': []}));
+			}
+			var currentTextArr = JSON.parse($.cookie(cookie_name));
+			currentTextArr.data.push(id);
+			$.cookie(cookie_name, JSON.stringify(currentTextArr));
+		}
+
+		function deleteCookie(id, cookie_name) {
+			if (typeof $.cookie(cookie_name) === 'undefined') {
+				$.cookie(cookie_name, JSON.stringify({'data': []}));
+			}
+			var currentTextArr = JSON.parse($.cookie(cookie_name));
+
+			currentTextArr.data = jQuery.grep(currentTextArr.data, function(value) {
+				return value != id;
+			});
+
+			$.cookie(cookie_name, JSON.stringify(currentTextArr));
+		}
+
+		function isIDNotAllowed(id, cookie_name) {
+			if (typeof $.cookie(cookie_name) === 'undefined') {
+				$.cookie(cookie_name, JSON.stringify({'data': []}));
+			}
+			var currentTextArr = JSON.parse($.cookie(cookie_name));
+
+			return ($.inArray(id, currentTextArr.data) !== -1);
+		}
+
+		function loadNotAllowed(table, cookie_name) {
+			$('#paperTable tr').each(function (i, row) {
+				var $row = $(row),
+					id = parseInt($row.find('.id_col').text());
+				if (i === 0)
+					return;
+				if (isIDNotAllowed(id, cookie_name) === true)
+				{
+					$(row).addClass('danger');
+					$(row).find('.bootstrap-checkbox').bootstrapToggle('off');
+				}
+			});
+		}
+
 		jQuery.get("http://localhost:8000/scraper/api/papers/?format=json", function(response) { 
 			$(function () {
 				$('#paperTable').bootstrapTable({
@@ -79,8 +127,17 @@
 
 				$("#paperTable .bootstrap-checkbox").bootstrapToggle();
 
+				loadNotAllowed($('#paperTable'), 'paper_cookies');
+
 				$('#paperTable .bootstrap-checkbox').change(function() {
-					jQuery(this).parent().parent().parent().toggleClass("danger");
+					var parent = jQuery(this).parent().parent().parent();
+					parent.toggleClass("danger");
+					id_val = parseInt(parent.find(".id_col").text());
+
+					if (parent.hasClass("danger") === true)
+						storeCookie(id_val, 'paper_cookies');
+					else
+						deleteCookie(id_val, 'paper_cookies');
 				});
 
 				$("#paperTable").removeClass("hidden");
@@ -115,6 +172,9 @@
 			return "<p>" + value.join("</p><p>") + "</p>";
 		}
 
+		function IDFormatter(value, row, index) {
+			return "<p class=\"id_col\">" + value + "</p>";
+		}
 
 		// http://jsfiddle.net/terryyounghk/kpegu/
 		function exportTableToCSV($table, filename) {
