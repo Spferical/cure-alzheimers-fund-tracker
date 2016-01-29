@@ -72,7 +72,7 @@
 		<hr>
 	</div>
 	<script type="text/javascript">
-		jQuery.get("http://localhost:8000/scraper/api/papers/?format=json", function(response) { 
+		jQuery.get("/scraper/api/papers/?format=json", function(response) { 
 			$(function () {
 				$('#paperTable').bootstrapTable({
 					data: response
@@ -88,7 +88,7 @@
 			});
 		});
 
-		jQuery.get("http://localhost:8000/scraper/api/projects/?format=json", function(response) {
+		jQuery.get("/scraper/api/projects/?format=json", function(response) {
 			$(function () {
 				$('#projectTable').bootstrapTable({
 					data: response
