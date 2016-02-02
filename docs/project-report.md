@@ -3,6 +3,8 @@ Automating Data Collection for Cure Alzheimer's Fund
 
 Srinivas Kaza, Matthew Pfeiffer, Hunter Gatewood
 
+`https://github.com/Spferical/cure-alzheimers-fund-tracker`
+
 ## Cure Alzheimer's Fund
 The Cure Alzheimer's Fund (`curealz.org`) is a registered public charity whose mission is to "fund research with the highest probability of preventing, slowing, or reversing Alzheimer's disease..." The CureAlz organization has an annual data-collection-a-thon where a small team spend an entire day compiling information about the research their donations have funded.
 

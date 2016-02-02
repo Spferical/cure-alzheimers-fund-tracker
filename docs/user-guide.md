@@ -1,6 +1,8 @@
 # Cure Alzheimer's Fund Data Collection (CAFDC)
 User Guide (non-technical)
 
+`https://github.com/Spferical/cure-alzheimers-fund-tracker`
+
 Quick points
 --
 - The data downloads are available at `https://scripts.mit.edu/*TODO*`
