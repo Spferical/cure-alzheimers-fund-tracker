@@ -1,4 +1,4 @@
 #!/usr/bin/bash
 source python/virtenv/bin/activate
 cd app-root/repo/
-python manage.py scrape
+nohup python manage.py scrape
