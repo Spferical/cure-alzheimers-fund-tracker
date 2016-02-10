@@ -28,48 +28,26 @@ _SUB_COST_IDX = 44
 def unicode_csv_reader(unicode_csv_data, dialect=csv.excel, **kwargs):
     # from https://docs.python.org/2/library/csv.html
     # csv.py doesn't do Unicode; encode temporarily as UTF-8:
-    csv_reader = csv.reader(utf_8_encoder(unicode_csv_data),
+    csv_reader = csv.reader(encoder(unicode_csv_data),
                             dialect=dialect, **kwargs)
     for row in csv_reader:
         # decode UTF-8 back to Unicode, cell by cell:
         yield [unicode(cell, 'utf-8') for cell in row]
 
 
-def utf_8_encoder(unicode_csv_data):
+def encoder(unicode_csv_data):
     # from https://docs.python.org/2/library/csv.html
     for line in unicode_csv_data:
-        yield line.encode('utf-8')
+        try:
+            yield line.encode('utf-8').rstrip()
+        except UnicodeDecodeError:
+            continue
 
 
 def get_query_regex(name):
     ''' Generates a query regex of the form \bNAME\b
     Name is assumed to be of the form Lastname, Firstname MI.'''
     return r"\b" + name.upper() + r"\b"
-
-
-def _decode_file(filename):
-    '''Remove carriage returns from passed filename.
-    Creates a temporary file, reads it as a bytes stream, then
-    writes back as a text file.
-    '''
-    tmp_filename = 'tmp'
-    shutil.copyfile(filename, tmp_filename)
-    with open(tmp_filename, 'rb') as unfixed:
-        with open(filename, 'w') as fixed:
-            # print "Failed lines:", "-" * 10, "\n\n"
-            for line in unfixed:
-                fixed_line = line.rstrip()
-                if len(fixed_line) == 0:
-                    continue
-                try:
-                    fixed_line = fixed_line.decode('utf-8')
-                    fixed.write(fixed_line)
-                    fixed.write('\n')
-                except UnicodeDecodeError:
-                    # print '\n', fixed_line
-                    pass
-            # print "\n\n/Failed lines", "-" * 10
-    os.remove(tmp_filename)
 
 
 def _require_csv_file(fiscal_year, force_redownload=False, force_reunzip=False):
@@ -93,14 +71,7 @@ def _require_csv_file(fiscal_year, force_redownload=False, force_reunzip=False):
         with open(zip_filename, 'wb') as zip_file:
             shutil.copyfileobj(request, zip_file)
 
-    # Unzip data file
-    if not csv_file_exists or force_reunzip:
-        print "Unzipping {}...".format(zip_filename)
-        zip_ref = zipfile.ZipFile(zip_filename, 'r')
-        zip_ref.extractall()
-        _decode_file(csv_filename)
-
-    return os.path.isfile(csv_filename)
+    return os.path.isfile(zip_filename)
 
 
 def _total_cost(csv_entry):
@@ -121,46 +92,50 @@ def _total_cost(csv_entry):
     return total_cost
 
 
-def save_projects_data(researcher, filename, year):
+def save_projects_data(researcher, year):
     '''Get project data for projects associated with passed
     researcher in passed filename.
     '''
-    with open(filename, 'r') as csv_file:
-        data_reader = unicode_csv_reader(csv_file, quotechar=str('"'))
-        for entry in data_reader:
-            if len(entry) < 45:
-                continue
+    zip_filename = _BASE_DATA_FILENAME.format(year=year, extension='zip')
+    csv_filename = _BASE_DATA_FILENAME.format(year=year, extension='csv')
+    with zipfile.ZipFile(open(zip_filename, 'r')) as zip_file:
+        with zip_file.open(csv_filename, 'r') as csv_file:
+            data_reader = unicode_csv_reader(csv_file, quotechar=str('"'))
+            for entry in data_reader:
+                if len(entry) < 45:
+                    continue
 
-            principal_investigators = entry[_PI_IDX]
-            pi_participated_in_entry = re.search(
-                get_query_regex(researcher.name), principal_investigators) is not None
+                principal_investigators = entry[_PI_IDX]
+                pi_participated_in_entry = re.search(
+                    get_query_regex(researcher.name),
+                    principal_investigators) is not None
 
-            if not pi_participated_in_entry:
-                continue
+                if not pi_participated_in_entry:
+                    continue
 
-            title = entry[_PROJ_TITLE_IDX]
-            total_cost = _total_cost(entry)
-            app_id = entry[_APP_ID_IDX]
-            url = _BASE_SUMMARY_URL.format(app_id=app_id)
-            print '-' * 10
-            print "Researcher:", researcher.name
-            print "Project:", title
-            print "URL:", url
-            funding_str = locale.currency(total_cost, grouping=True)[:-3]
-            print("Amount:", funding_str)
-            query = Project.objects.filter(title=title, year=int(year))
-            if not query:
-                # only create the project if it doesn't exist yet
-                project = Project(
-                    researcher=researcher,
-                    title=title,
-                    url=url,
-                    funding_amount=total_cost,
-                    year=int(year))
-            else:
-                project = query[0]
-                project.funding_amount = total_cost
-            project.save()
+                title = entry[_PROJ_TITLE_IDX]
+                total_cost = _total_cost(entry)
+                app_id = entry[_APP_ID_IDX]
+                url = _BASE_SUMMARY_URL.format(app_id=app_id)
+                print '-' * 10
+                print "Researcher:", researcher.name
+                print "Project:", title
+                print "URL:", url
+                funding_str = locale.currency(total_cost, grouping=True)[:-3]
+                print("Amount:", funding_str)
+                query = Project.objects.filter(title=title, year=int(year))
+                if not query:
+                    # only create the project if it doesn't exist yet
+                    project = Project(
+                        researcher=researcher,
+                        title=title,
+                        url=url,
+                        funding_amount=total_cost,
+                        year=int(year))
+                else:
+                    project = query[0]
+                    project.funding_amount = total_cost
+                project.save()
 
 
 def scrape(year):
@@ -168,7 +143,6 @@ def scrape(year):
     locale.setlocale(locale.LC_ALL, '')
 
     _require_csv_file(year)
-    csv_filename = _BASE_DATA_FILENAME.format(year=year, extension='csv')
 
     for researcher in Author.objects.all():
-        save_projects_data(researcher, csv_filename, year)
+        save_projects_data(researcher, year)
