@@ -1,4 +1,5 @@
 #!/bin/bash
+cd ~
 source python/virtenv/bin/activate
-cd app-root/repo/
+cd ~/app-root/repo/
 nohup python manage.py scrape >>../data/scrapelog.txt 2>&1
