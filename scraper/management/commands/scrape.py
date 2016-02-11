@@ -7,12 +7,13 @@ import time
 from bibtexparser.latexenc import unicode_to_latex, unicode_to_crappy_latex1, \
     unicode_to_crappy_latex2
 from django.core.management.base import BaseCommand
+from django.conf import settings
 from scraper import scholar_data
 from scraper import nih_data
 from scraper.models import Paper, Author
 
 
-PROGRESS_FILE = 'scrape_progress.db'
+PROGRESS_FILE = os.path.join(settings.DATA_DIR, 'scrape_progress.db')
 
 class Command(BaseCommand):
     def handle_publication(self, publication, year):
