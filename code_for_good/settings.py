@@ -18,6 +18,11 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+if 'OPENSHIFT_DATA_DIR' in os.environ:
+    DATA_DIR = os.environ['OPENSHIFT_DATA_DIR']
+else:
+    DATA_DIR = BASE_DIR
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
@@ -83,7 +88,7 @@ WSGI_APPLICATION = 'code_for_good.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(os.environ['OPENSHIFT_DATA_DIR'], 'sqlite3.db'),
+        'NAME': os.path.join(DATA_DIR, 'sqlite3.db'),
     }
 }
 

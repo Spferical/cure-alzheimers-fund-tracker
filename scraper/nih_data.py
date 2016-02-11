@@ -10,6 +10,7 @@ import csv
 import locale
 import os.path
 import urllib2
+from django.conf import settings
 from scraper.models import Author, Project
 
 _BASE_SUMMARY_URL = "https://projectreporter.nih.gov/project_info_description.cfm?aid={app_id}"
@@ -50,28 +51,25 @@ def get_query_regex(name):
     return r"\b" + re.escape(name.upper()) + r"\b"
 
 
-def _require_csv_file(fiscal_year, force_redownload=False, force_reunzip=False):
+def _require_csv_file(fiscal_year, force_redownload=False):
     '''Download the CSV file for the passed fiscal year if necessary.
     Return True if successful, False otherwise.
     '''
     csv_filename = _BASE_DATA_FILENAME.format(year=fiscal_year, extension='csv')
-    zip_filename = _BASE_DATA_FILENAME.format(year=fiscal_year, extension='zip')
-    csv_file_exists = os.path.isfile(csv_filename)
-    zip_file_exists = os.path.isfile(zip_filename)
-
-    if csv_file_exists and not force_redownload and not force_reunzip:
-        print "File already exists:", csv_filename
-        return True
+    zip_path = os.path.join(
+        settings.DATA_DIR,
+        _BASE_DATA_FILENAME.format(year=fiscal_year, extension='zip'))
+    zip_file_exists = os.path.isfile(zip_path)
 
     # Download zip file
     if not zip_file_exists or force_redownload:
         url = _BASE_DATA_URL.format(year=fiscal_year)
         print "Downloading from {}...".format(url)
         request = urllib2.urlopen(url)
-        with open(zip_filename, 'wb') as zip_file:
+        with open(zip_path, 'wb') as zip_file:
             shutil.copyfileobj(request, zip_file)
 
-    return os.path.isfile(zip_filename)
+    return os.path.isfile(zip_path)
 
 
 def _total_cost(csv_entry):
@@ -94,12 +92,14 @@ def _total_cost(csv_entry):
 
 def save_projects_data(researcher, year):
     '''Get project data for projects associated with passed
-    researcher in passed filename.
+    researcher in passed year.
     '''
-    zip_filename = _BASE_DATA_FILENAME.format(year=year, extension='zip')
+    zip_path = os.path.join(
+        settings.DATA_DIR,
+        _BASE_DATA_FILENAME.format(year=year, extension='zip'))
     csv_filename = _BASE_DATA_FILENAME.format(year=year, extension='csv')
     regex = re.compile(get_query_regex(researcher.name))
-    with zipfile.ZipFile(open(zip_filename, 'r')) as zip_file:
+    with zipfile.ZipFile(open(zip_path, 'r')) as zip_file:
         with zip_file.open(csv_filename, 'r') as csv_file:
             data_reader = unicode_csv_reader(csv_file, quotechar=str('"'))
             for entry in data_reader:
