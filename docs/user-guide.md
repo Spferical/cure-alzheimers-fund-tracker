@@ -1,11 +1,13 @@
 # Cure Alzheimer's Fund Data Collection (CAFDC)
 User Guide (non-technical)
 
-`https://github.com/Spferical/cure-alzheimers-fund-tracker`
+Site: `https://curealz-mpfei.rhcloud.com/scraper/`
+
+Source code: `https://github.com/Spferical/cure-alzheimers-fund-tracker`
 
 Quick points
 --
-- The data downloads are available at `https://scripts.mit.edu/*TODO*`
+- See `https://curealz-mpfei.rhcloud.com/scraper/` for the data downloads
 - It will take a few days to initially collect all of the information
 - However, once the data has been collected, it will always be ready to go
 
