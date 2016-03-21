@@ -9,6 +9,13 @@ class Author(models.Model):
         return self.name
 
 
+class FundedAuthor(models.Model):
+    name = models.TextField()
+
+    def __str__(self):
+        return self.name
+
+
 class Paper(models.Model):
     url = models.TextField()
     title = models.TextField()
@@ -24,7 +31,7 @@ class Paper(models.Model):
 
 
 class Project(models.Model):
-    researcher = models.ForeignKey(Author)
+    researcher = models.ForeignKey(FundedAuthor)
     title = models.TextField()
     url = models.TextField()
     funding_amount = models.IntegerField()

@@ -11,7 +11,7 @@ import locale
 import os.path
 import urllib2
 from django.conf import settings
-from scraper.models import Author, Project
+from scraper.models import FundedAuthor, Project
 
 _BASE_SUMMARY_URL = "https://projectreporter.nih.gov/project_info_description.cfm?aid={app_id}"
 _BASE_DATA_FILENAME = "RePORTER_PRJ_C_FY{year}.{extension}"
@@ -144,5 +144,5 @@ def scrape(year):
 
     _require_csv_file(year)
 
-    for researcher in Author.objects.all():
+    for researcher in FundedAuthor.objects.all():
         save_projects_data(researcher, year)
