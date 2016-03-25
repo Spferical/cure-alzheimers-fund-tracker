@@ -19,7 +19,15 @@ class Command(BaseCommand):
     def handle_publication(self, publication, year):
         time.sleep(50)
         self.stdout.write('-' * 10)
-        publication.fill()
+        try:
+            publication.fill()
+        except Exception as e:
+            if '404' in str(e):
+                self.stdout.write("WARNING: 404 on handling " +
+                                  publication.bib['title'])
+                return
+            else:
+                raise e
         try:
             num_citations = publication.citedby
         except AttributeError:
